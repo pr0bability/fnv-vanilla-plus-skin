@@ -11,6 +11,7 @@ BS_ALLOCATORS
 IDebugLog gLog("logs\\VanillaPlusSkin.log");
 
 // Hook related globals.
+static VirtFuncDetour kPickShaderDetour;
 static VirtFuncDetour kSetupGeometryDetour;
 static VirtFuncDetour kSkinUpdateConstants;
 
@@ -21,10 +22,18 @@ static constexpr uint32_t		uiShaderLoaderVersion = 131;
 
 class BSShaderPPLightingPropertyEx : public BSShaderPPLightingProperty {
 public:
+	BSShaderProperty* PickShaderEx(NiGeometry* apGeometry, void* unk0, void* unk1) {
+		// Force shader to SLS if shader is skin and doesn't have the facegen flag.
+		if (uiShaderIndex == BSShaderManager::BSSM_SHADER_SKIN && !IsFaceGen())
+			uiShaderIndex = BSShaderManager::BSSM_SHADER_SHADOWLIGHT;
+
+		return ThisCall<BSShaderProperty*>(kPickShaderDetour.GetOverwrittenAddr(), this, apGeometry, unk0, unk1);
+	};
+
 	bool SetupGeometryEx(NiGeometry* apGeometry) {
-		// Setup curvature for facegen geometries (faces, hands, etc.).
+		// Setup curvature for anything using skin shader (faces, hands, etc.).
 		NiTriBasedGeom* pTriBasedGeom = apGeometry->IsTriBasedGeometry();
-		if (pTriBasedGeom && IsFaceGen())
+		if (pTriBasedGeom && apGeometry->GetShader()->IsSkinShader())
 			SubsurfaceScattering::AddCurvatureDataToGeometry(pTriBasedGeom);
 
 		return ThisCall<bool>(kSetupGeometryDetour.GetOverwrittenAddr(), this, apGeometry);
@@ -90,6 +99,7 @@ public:
 };
 
 void InitHooks() {
+	kPickShaderDetour.ReplaceVirtualFuncEx(0x10AE180, &BSShaderPPLightingPropertyEx::PickShaderEx);
 	kSetupGeometryDetour.ReplaceVirtualFuncEx(0x10AE16C, &BSShaderPPLightingPropertyEx::SetupGeometryEx);
 
 	WriteRelJump(0xBCFB00, &SkinShaderEx::CreateSDInfo);
@@ -109,7 +119,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "Vanilla Plus Skin";
-	info->version = 100;
+	info->version = 110;
 
 	return !nvse->isEditor;
 }
