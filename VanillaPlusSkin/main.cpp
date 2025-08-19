@@ -24,8 +24,10 @@ class BSShaderPPLightingPropertyEx : public BSShaderPPLightingProperty {
 public:
 	BSShaderProperty* PickShaderEx(NiGeometry* apGeometry, void* unk0, void* unk1) {
 		// Force shader to SLS if shader is skin and doesn't have the facegen flag.
-		if (uiShaderIndex == BSShaderManager::BSSM_SHADER_SKIN && !IsFaceGen())
+		if (uiShaderIndex == BSShaderManager::BSSM_SHADER_SKIN && !IsFaceGen()) {
+			SubsurfaceScattering::LogGeometry(apGeometry, "skin shader on not facegen geometry");
 			uiShaderIndex = BSShaderManager::BSSM_SHADER_SHADOWLIGHT;
+		}
 
 		return ThisCall<BSShaderProperty*>(kPickShaderDetour.GetOverwrittenAddr(), this, apGeometry, unk0, unk1);
 	};

@@ -18,8 +18,10 @@ static const uint32_t uiSSSTexSize = 1024;
 void SubsurfaceScattering::AddCurvatureDataToGeometry(NiTriBasedGeom* apGeometry, float afScale) {
     NiTriBasedGeomData* pGeoData = apGeometry->GetModelData();
 
-    if (!pGeoData)
+    if (!pGeoData) {
+        LogGeometry(apGeometry, "no geometry data");
         return;
+    }
 
     if (pGeoData->m_spAdditionalGeomData) {
         return;
@@ -34,6 +36,7 @@ void SubsurfaceScattering::AddCurvatureDataToGeometry(NiTriBasedGeom* apGeometry
     const uint16_t usVertexCount = pGeoData->GetVertexCount();
 
     if (!kVertices || !kNormals || !kTangents || !kBinormals) {
+        LogGeometry(apGeometry, "geometry has no vertices or TBN vectors are missing");
         return;
     }
 
@@ -66,6 +69,10 @@ void SubsurfaceScattering::InitializeTextures() {
     spSkinLUTTexture = BSRenderedTexture::Create("SkinLUT", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
 
     RenderSkinLUT();
+}
+
+void SubsurfaceScattering::LogGeometry(NiGeometry* apGeometry, const char* asReason) {
+    _MESSAGE("Problematic geometry: %s (%s).", apGeometry->GetName(), asReason);
 }
 
 void SubsurfaceScattering::ProcessTriangleForCurvature(

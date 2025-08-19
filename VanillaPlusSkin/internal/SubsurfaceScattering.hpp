@@ -17,6 +17,8 @@ public:
 	static void AddCurvatureDataToGeometry(NiTriBasedGeom* apGeometry, float afScale = 1.0f);
     static void InitializeTextures();
 
+    static void LogGeometry(NiGeometry* apGeometry, const char* asReason);
+
 protected:
     struct FaceCurvatureTensor {
         DirectX::XMVECTOR u;
