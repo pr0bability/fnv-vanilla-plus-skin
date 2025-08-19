@@ -107,7 +107,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(ProjectDir)..\package\NVSE\Plugins\$(Tar
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <Optimization>MaxSpeed</Optimization>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
