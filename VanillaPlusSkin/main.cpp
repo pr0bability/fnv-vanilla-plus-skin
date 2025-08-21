@@ -124,7 +124,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "Vanilla Plus Skin";
-	info->version = 111;
+	info->version = 120;
 
 	return !nvse->isEditor;
 }
