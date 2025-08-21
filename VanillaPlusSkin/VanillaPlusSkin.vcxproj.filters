@@ -115,6 +115,9 @@
     <ClCompile Include="internal\Game\Bethesda\BSRenderedTexture.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiDX9TextureData.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse_version.h">

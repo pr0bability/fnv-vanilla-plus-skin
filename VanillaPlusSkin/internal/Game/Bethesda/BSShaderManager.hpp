@@ -878,4 +878,6 @@ public:
 	static ShaderBuffer* GetShaderBufferLoader();
 
 	static NiDX9Renderer* GetRenderer();
+
+	static void GetTexture(const char* apFilename, bool abLoadFile, NiPointer<NiTexture>& aspTexture, bool abCheckMips = true, bool abCubeMap = false);
 };

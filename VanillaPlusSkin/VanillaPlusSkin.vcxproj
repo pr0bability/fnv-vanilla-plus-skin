@@ -150,6 +150,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(ProjectDir)..\package\NVSE\Plugins\$(Tar
     <ClCompile Include="internal\Game\Gamebryo\NiD3DTextureStage.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiDX9Renderer.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiDX9ShaderDeclaration.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiDX9TextureData.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGeometryData.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />

@@ -1,5 +1,6 @@
 #include "SubsurfaceScattering.hpp"
 #include "Bethesda/BSShader.hpp"
+#include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Gamebryo/NiAdditionalGeometryData.hpp"
 #include "Gamebryo/NiDX9Renderer.hpp"
@@ -7,15 +8,28 @@
 
 using namespace DirectX;
 
+static const char* cLUTPath = "Data\\Textures\\SSS\\LUT.dds";
+
+NiTexturePtr SubsurfaceScattering::spSkinLUTTexture;
+
 NiD3DPixelShaderPtr SubsurfaceScattering::spScatterProfileShader;
 NiD3DPixelShaderPtr SubsurfaceScattering::spSkinLUTShader;
 
-BSRenderedTexturePtr SubsurfaceScattering::spScatterProfileTexture;
-BSRenderedTexturePtr SubsurfaceScattering::spSkinLUTTexture;
+BSRenderedTexturePtr SubsurfaceScattering::spScatterProfileRT;
+BSRenderedTexturePtr SubsurfaceScattering::spSkinLUTRT;
 
 static const uint32_t uiSSSTexSize = 1024;
 
 void SubsurfaceScattering::InitializeTextures() {
+    // Try loading from file first.
+    BSShaderManager::GetTexture(cLUTPath, true, spSkinLUTTexture, false, false);
+
+    if (spSkinLUTTexture) {
+        _MESSAGE("SSS LUT loaded from file %s", cLUTPath);
+        return;
+    }
+    
+    // Not cached yet, render.
     spScatterProfileShader = BSShader::pLoadPixelShader("SSS\\LINEAR_PROFILE.pso");
     spSkinLUTShader = BSShader::pLoadPixelShader("SSS\\LUT.pso");
 
@@ -24,10 +38,16 @@ void SubsurfaceScattering::InitializeTextures() {
     BSRenderedTexture::bIsRenderTarget = true;
     BSRenderedTexture::eFormat = D3DFMT_A16B16G16R16F;
 
-    spScatterProfileTexture = BSRenderedTexture::Create("LinearScatterProfile", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
-    spSkinLUTTexture = BSRenderedTexture::Create("SkinLUT", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
+    spScatterProfileRT = BSRenderedTexture::Create("LinearScatterProfile", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
+    spSkinLUTRT = BSRenderedTexture::Create("SkinLUT", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
 
     RenderSkinLUT();
+
+    spSkinLUTTexture = spSkinLUTRT->GetTexture(0);
+
+    spSkinLUTRT->SaveTexture(cLUTPath, D3DXIFF_DDS);
+
+    _MESSAGE("SSS LUT rendered and saved to a file %s", cLUTPath);
 }
 
 bool SubsurfaceScattering::ResetCallback(bool abBeforeReset, void* pvData) {
@@ -446,7 +466,7 @@ void SubsurfaceScattering::RenderSkinLUT() {
     IDirect3DDevice9* pDevice = pRenderer->GetD3DDevice();
 
     // Scatter profile.
-    BSRenderedTexture::StartOffscreen(NiRenderer::CLEAR_NONE, spScatterProfileTexture->GetRenderTargetGroup());
+    BSRenderedTexture::StartOffscreen(NiRenderer::CLEAR_NONE, spScatterProfileRT->GetRenderTargetGroup());
 
     pDevice->SetPixelShader(spScatterProfileShader->GetShaderHandle());
 
@@ -473,11 +493,11 @@ void SubsurfaceScattering::RenderSkinLUT() {
     BSRenderedTexture::StopOffscreen();
     
     // Skin LUT.
-    BSRenderedTexture::StartOffscreen(NiRenderer::CLEAR_NONE, spSkinLUTTexture->GetRenderTargetGroup());
+    BSRenderedTexture::StartOffscreen(NiRenderer::CLEAR_NONE, spSkinLUTRT->GetRenderTargetGroup());
 
     pDevice->SetPixelShader(spSkinLUTShader->GetShaderHandle());
 
-    pDevice->SetTexture(0, spScatterProfileTexture->GetTexture(0)->GetDX9RendererData()->GetD3DTexture());
+    pDevice->SetTexture(0, spScatterProfileRT->GetTexture(0)->GetDX9RendererData()->GetD3DTexture());
     pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 
     pDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(Vertex));

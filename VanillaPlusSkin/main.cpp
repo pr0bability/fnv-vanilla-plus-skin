@@ -84,10 +84,10 @@ public:
 	void SetGlowMap(void* apShaderProp, uint32_t auiStageNumber, uint32_t auiTextureNumber, bool abFallbackTex) {
 		NiD3DTextureStage* pTextureStage = GetCurrentPass()->GetStage(auiStageNumber);
 
-		if (pTextureStage->m_pkTexture == SubsurfaceScattering::spSkinLUTTexture->GetTexture(0))
+		if (pTextureStage->m_pkTexture == SubsurfaceScattering::spSkinLUTTexture)
 			return;
 
-		pTextureStage->m_pkTexture = SubsurfaceScattering::spSkinLUTTexture->GetTexture(0);
+		pTextureStage->m_pkTexture = SubsurfaceScattering::spSkinLUTTexture;
 		pTextureStage->SetClampMode(NiTexturingProperty::CLAMP_S_CLAMP_T);
 	}
 

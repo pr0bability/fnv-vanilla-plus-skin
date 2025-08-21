@@ -1,5 +1,9 @@
 #include "BSRenderedTexture.hpp"
 
+bool BSRenderedTexture::SaveTexture(const char* path, D3DXIMAGE_FILEFORMAT aeFormat) const {
+	return static_cast<NiDX9TextureData*>(spRenderedTextures[0]->m_pkRendererData)->SaveTexture(path, aeFormat);
+}
+
 // GAME - 0xB6B610
 // GECK - 0x9029E0
 BSRenderedTexture* BSRenderedTexture::Create(const NiFixedString& arName, const uint32_t uiWidth, const uint32_t uiHeight, NiTexture::FormatPrefs* kPrefs, Ni2DBuffer::MultiSamplePreference eMSAAPref, bool bUseDepthStencil, NiDepthStencilBuffer* pkDSBuffer, uint32_t a7, uint32_t uiBackgroundColor) {

@@ -26,6 +26,8 @@ public:
 	uint32_t				m_uiLevels;
 
 	NiNewRTTI(NiDX9TextureData, NiTexture::RendererData);
+
+	bool SaveTexture(const char* path, D3DXIMAGE_FILEFORMAT aeFormat);
 };
 
 ASSERT_SIZE(NiDX9TextureData, 0x6C);

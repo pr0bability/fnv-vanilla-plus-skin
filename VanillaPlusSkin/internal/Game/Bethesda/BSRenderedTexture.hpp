@@ -19,6 +19,8 @@ public:
 
 	NiNewRTTI(BSRenderedTexture, NiObject);
 
+	bool SaveTexture(const char* path, const D3DXIMAGE_FILEFORMAT aeFormat) const;
+
 	static BSRenderedTexture* Create(const NiFixedString& arName, const uint32_t uiWidth, const uint32_t uiHeight,
 		NiTexture::FormatPrefs* kPrefs, Ni2DBuffer::MultiSamplePreference eMSAAPref,
 		bool bUseDepthStencil, NiDepthStencilBuffer* pkDSBuffer, uint32_t a7, uint32_t uiBackgroundColor);

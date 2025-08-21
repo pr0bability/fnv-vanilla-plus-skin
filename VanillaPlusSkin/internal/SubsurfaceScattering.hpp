@@ -8,11 +8,7 @@
 
 class SubsurfaceScattering {
 public:
-    static NiD3DPixelShaderPtr  spScatterProfileShader;
-    static NiD3DPixelShaderPtr  spSkinLUTShader;
-
-    static BSRenderedTexturePtr spScatterProfileTexture;
-    static BSRenderedTexturePtr spSkinLUTTexture;
+    static NiTexturePtr spSkinLUTTexture;
 
     static void InitializeTextures();
     static bool ResetCallback(bool abBeforeReset, void* pvData);
@@ -22,6 +18,12 @@ public:
     static void LogGeometry(NiGeometry* apGeometry, const char* asReason);
 
 protected:
+    static NiD3DPixelShaderPtr  spScatterProfileShader;
+    static NiD3DPixelShaderPtr  spSkinLUTShader;
+
+    static BSRenderedTexturePtr spScatterProfileRT;
+    static BSRenderedTexturePtr spSkinLUTRT;
+
     struct FaceCurvatureTensor {
         DirectX::XMVECTOR u;
         DirectX::XMVECTOR v;
