@@ -15,6 +15,28 @@ BSRenderedTexturePtr SubsurfaceScattering::spSkinLUTTexture;
 
 static const uint32_t uiSSSTexSize = 1024;
 
+void SubsurfaceScattering::InitializeTextures() {
+    spScatterProfileShader = BSShader::pLoadPixelShader("SSS\\LINEAR_PROFILE.pso");
+    spSkinLUTShader = BSShader::pLoadPixelShader("SSS\\LUT.pso");
+
+    NiTexture::FormatPrefs kTextureFormat(NiTexture::FormatPrefs::FLOAT_COLOR_64, NiTexture::FormatPrefs::ALPHA_DEFAULT, NiTexture::FormatPrefs::NO);
+    BSRenderedTexture::bUseCustomFormat = true;
+    BSRenderedTexture::bIsRenderTarget = true;
+    BSRenderedTexture::eFormat = D3DFMT_A16B16G16R16F;
+
+    spScatterProfileTexture = BSRenderedTexture::Create("LinearScatterProfile", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
+    spSkinLUTTexture = BSRenderedTexture::Create("SkinLUT", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
+
+    RenderSkinLUT();
+}
+
+bool SubsurfaceScattering::ResetCallback(bool abBeforeReset, void* pvData) {
+    if (!abBeforeReset)
+        InitializeTextures();
+
+    return true;
+}
+
 void SubsurfaceScattering::AddCurvatureDataToGeometry(NiTriBasedGeom* apGeometry, float afScale) {
     NiTriBasedGeomData* pGeoData = apGeometry->GetModelData();
 
@@ -54,21 +76,6 @@ void SubsurfaceScattering::AddCurvatureDataToGeometry(NiTriBasedGeom* apGeometry
     }
 
     StoreCurvatureResults(pGeoData, finalCurvatures, afScale);
-}
-
-void SubsurfaceScattering::InitializeTextures() {
-    spScatterProfileShader = BSShader::pLoadPixelShader("SSS\\LINEAR_PROFILE.pso");
-    spSkinLUTShader = BSShader::pLoadPixelShader("SSS\\LUT.pso");
-
-    NiTexture::FormatPrefs kTextureFormat(NiTexture::FormatPrefs::FLOAT_COLOR_64, NiTexture::FormatPrefs::ALPHA_DEFAULT, NiTexture::FormatPrefs::NO);
-    BSRenderedTexture::bUseCustomFormat = true;
-    BSRenderedTexture::bIsRenderTarget = true;
-    BSRenderedTexture::eFormat = D3DFMT_A16B16G16R16F;
-
-    spScatterProfileTexture = BSRenderedTexture::Create("LinearScatterProfile", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
-    spSkinLUTTexture = BSRenderedTexture::Create("SkinLUT", uiSSSTexSize, uiSSSTexSize, &kTextureFormat, Ni2DBuffer::MULTISAMPLE_NONE, false, nullptr, 0, 0);
-
-    RenderSkinLUT();
 }
 
 void SubsurfaceScattering::LogGeometry(NiGeometry* apGeometry, const char* asReason) {

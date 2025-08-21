@@ -114,6 +114,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	case NVSEMessagingInterface::kMessage_DeferredInit:
 		// Render skin SSS LUT.
 		SubsurfaceScattering::InitializeTextures();
+
+		// Add device reset callback for texture initialization.
+		NiDX9Renderer::GetSingleton()->AddResetNotificationFunc(SubsurfaceScattering::ResetCallback, nullptr);
 		break;
 	}
 }

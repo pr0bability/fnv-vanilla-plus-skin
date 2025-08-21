@@ -14,8 +14,10 @@ public:
     static BSRenderedTexturePtr spScatterProfileTexture;
     static BSRenderedTexturePtr spSkinLUTTexture;
 
-	static void AddCurvatureDataToGeometry(NiTriBasedGeom* apGeometry, float afScale = 1.0f);
     static void InitializeTextures();
+    static bool ResetCallback(bool abBeforeReset, void* pvData);
+
+	static void AddCurvatureDataToGeometry(NiTriBasedGeom* apGeometry, float afScale = 1.0f);
 
     static void LogGeometry(NiGeometry* apGeometry, const char* asReason);
 

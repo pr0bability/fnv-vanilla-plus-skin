@@ -50,6 +50,8 @@ class NiDepthStencilBuffer;
 class NiVBBlock;
 struct NiViewport;
 
+typedef bool (*pfn_ResetNotifyFunction)(bool bBeforeReset, void* pvData);
+
 NiSmartPointer(NiDX9Renderer);
 
 class NiDX9Renderer : public NiRenderer {
@@ -391,6 +393,8 @@ public:
 	static LPDIRECT3D9 GetD3D9();
 
 	LPDIRECT3DDEVICE9 GetD3DDevice() const;
+
+	uint32_t AddResetNotificationFunc(pfn_ResetNotifyFunction apfnNotify, void* pvData);
 };
 
 ASSERT_SIZE(NiDX9Renderer, 0xB80);

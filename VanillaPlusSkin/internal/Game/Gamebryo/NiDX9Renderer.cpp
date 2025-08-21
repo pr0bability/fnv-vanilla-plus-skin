@@ -11,3 +11,7 @@ LPDIRECT3D9 NiDX9Renderer::GetD3D9() {
 LPDIRECT3DDEVICE9 NiDX9Renderer::GetD3DDevice() const {
 	return m_pkD3DDevice9;
 }
+
+uint32_t NiDX9Renderer::AddResetNotificationFunc(pfn_ResetNotifyFunction apfnNotify, void* pvData) {
+	return ThisCall<uint32_t>(0x86BAE0, this, apfnNotify, pvData);
+}
