@@ -18,7 +18,7 @@ NiD3DPixelShaderPtr SubsurfaceScattering::spSkinLUTShader;
 BSRenderedTexturePtr SubsurfaceScattering::spScatterProfileRT;
 BSRenderedTexturePtr SubsurfaceScattering::spSkinLUTRT;
 
-static const uint32_t uiSSSTexSize = 1024;
+static const uint32_t uiSSSTexSize = 512;
 
 void SubsurfaceScattering::InitializeTextures() {
     // Try loading from file first.
