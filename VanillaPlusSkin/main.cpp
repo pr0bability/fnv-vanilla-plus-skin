@@ -11,9 +11,11 @@ BS_ALLOCATORS
 IDebugLog gLog("logs\\VanillaPlusSkin.log");
 
 // Hook related globals.
-static VirtFuncDetour kPickShaderDetour;
-static VirtFuncDetour kSetupGeometryDetour;
-static VirtFuncDetour kSkinUpdateConstants;
+static CallDetour		kSetupGeometryDetour[2];
+
+static VirtFuncDetour	kPickShaderVirtDetour[4];
+static VirtFuncDetour	kSetupGeometryVirtDetour[4];
+static VirtFuncDetour	kSkinUpdateConstants;
 
 // Constants.
 static NVSEMessagingInterface*	pMsgInterface = nullptr;
@@ -22,23 +24,35 @@ static constexpr uint32_t		uiShaderLoaderVersion = 131;
 
 class BSShaderPPLightingPropertyEx : public BSShaderPPLightingProperty {
 public:
+	template <uint32_t uiCall>
 	BSShaderProperty* PickShaderEx(NiGeometry* apGeometry, void* unk0, void* unk1) {
 		// Force shader to SLS if shader is skin and doesn't have the facegen flag.
 		if (uiShaderIndex == BSShaderManager::BSSM_SHADER_SKIN && !IsFaceGen()) {
 			SubsurfaceScattering::LogGeometry(apGeometry, "skin shader on not facegen geometry");
-			uiShaderIndex = BSShaderManager::BSSM_SHADER_SHADOWLIGHT;
+			uiShaderIndex = BSShaderManager::BSSM_SHADER_DEFAULT;
 		}
 
-		return ThisCall<BSShaderProperty*>(kPickShaderDetour.GetOverwrittenAddr(), this, apGeometry, unk0, unk1);
+		return ThisCall<BSShaderProperty*>(kPickShaderVirtDetour[uiCall].GetOverwrittenAddr(), this, apGeometry, unk0, unk1);
 	};
 
+	template<uint32_t uiCall>
 	bool SetupGeometryEx(NiGeometry* apGeometry) {
 		// Setup curvature for anything using skin shader (faces, hands, etc.).
 		NiTriBasedGeom* pTriBasedGeom = apGeometry->IsTriBasedGeometry();
 		if (pTriBasedGeom && apGeometry->GetShader()->IsSkinShader())
 			SubsurfaceScattering::AddCurvatureDataToGeometry(pTriBasedGeom);
 
-		return ThisCall<bool>(kSetupGeometryDetour.GetOverwrittenAddr(), this, apGeometry);
+		return ThisCall<bool>(kSetupGeometryDetour[uiCall].GetOverwrittenAddr(), this, apGeometry);
+	}
+
+	template<uint32_t uiCall>
+	bool SetupGeometryVirtEx(NiGeometry* apGeometry) {
+		// Setup curvature for anything using skin shader (faces, hands, etc.).
+		NiTriBasedGeom* pTriBasedGeom = apGeometry->IsTriBasedGeometry();
+		if (pTriBasedGeom && apGeometry->GetShader()->IsSkinShader())
+			SubsurfaceScattering::AddCurvatureDataToGeometry(pTriBasedGeom);
+
+		return ThisCall<bool>(kSetupGeometryVirtDetour[uiCall].GetOverwrittenAddr(), this, apGeometry);
 	}
 };
 
@@ -101,8 +115,16 @@ public:
 };
 
 void InitHooks() {
-	kPickShaderDetour.ReplaceVirtualFuncEx(0x10AE180, &BSShaderPPLightingPropertyEx::PickShaderEx);
-	kSetupGeometryDetour.ReplaceVirtualFuncEx(0x10AE16C, &BSShaderPPLightingPropertyEx::SetupGeometryEx);
+	kPickShaderVirtDetour[0].ReplaceVirtualFuncEx(0x10AE180, &BSShaderPPLightingPropertyEx::PickShaderEx<0>);
+	kPickShaderVirtDetour[1].ReplaceVirtualFuncEx(0x10B99C0, &BSShaderPPLightingPropertyEx::PickShaderEx<1>);
+	kPickShaderVirtDetour[2].ReplaceVirtualFuncEx(0x10BACA8, &BSShaderPPLightingPropertyEx::PickShaderEx<2>);
+	kPickShaderVirtDetour[3].ReplaceVirtualFuncEx(0x10BCC10, &BSShaderPPLightingPropertyEx::PickShaderEx<3>);
+	kSetupGeometryDetour[0].ReplaceCallEx(0xBB5FFA, &BSShaderPPLightingPropertyEx::SetupGeometryEx<0>);
+	kSetupGeometryDetour[1].ReplaceCallEx(0xBC45D7, &BSShaderPPLightingPropertyEx::SetupGeometryEx<1>);
+	kSetupGeometryVirtDetour[0].ReplaceVirtualFuncEx(0x10AE16C, &BSShaderPPLightingPropertyEx::SetupGeometryVirtEx<0>);
+	kSetupGeometryVirtDetour[1].ReplaceVirtualFuncEx(0x10B83CC, &BSShaderPPLightingPropertyEx::SetupGeometryVirtEx<1>);
+	kSetupGeometryVirtDetour[2].ReplaceVirtualFuncEx(0x10B93D4, &BSShaderPPLightingPropertyEx::SetupGeometryVirtEx<2>);
+	kSetupGeometryVirtDetour[3].ReplaceVirtualFuncEx(0x10B952C, &BSShaderPPLightingPropertyEx::SetupGeometryVirtEx<3>);
 
 	WriteRelJump(0xBCFB00, &SkinShaderEx::CreateSDInfo);
 	ReplaceCallEx(0xBD036B, &SkinShaderEx::SetGlowMap);
