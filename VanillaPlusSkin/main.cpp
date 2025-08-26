@@ -98,8 +98,8 @@ public:
 	void SetGlowMap(void* apShaderProp, uint32_t auiStageNumber, uint32_t auiTextureNumber, bool abFallbackTex) {
 		NiD3DTextureStage* pTextureStage = GetCurrentPass()->GetStage(auiStageNumber);
 
-		if (pTextureStage->m_pkTexture == SubsurfaceScattering::spSkinLUTTexture)
-			return;
+		if (!SubsurfaceScattering::spSkinLUTTexture)
+			_MESSAGE("LUT texture does not exist");
 
 		pTextureStage->m_pkTexture = SubsurfaceScattering::spSkinLUTTexture;
 		pTextureStage->SetClampMode(NiTexturingProperty::CLAMP_S_CLAMP_T);
